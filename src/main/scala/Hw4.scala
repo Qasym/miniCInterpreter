@@ -79,7 +79,83 @@ object MiniCInterpreter {
   case class UndefinedSemantics(msg: String = "", cause: Throwable = None.orNull) extends Exception("Undefined Semantics: " ++ msg, cause)
     
   
-  def eval(env: Env, mem: Mem, expr: Expr): Result = Result(SkipVal, mem)
+  def eval(env: Env, mem: Mem, expr: Expr): Result = expr match {
+    case Skip => {
+      
+    }
+    case False => {
+      
+    }
+    case True => {
+      
+    }
+    case NotExpr(expr) => {
+      
+    }
+    case Const(n) => {
+      
+    }
+    case Var(s) => {
+      
+    }
+    case Add(l, r) => {
+      
+    }
+    case Sub(l, r) => {
+      
+    }
+    case Mul(l, r) => {
+      
+    }
+    case Div(l, r) => {
+      
+    }
+    case LTEExpr(l, r) => {
+      
+    }
+    case EQExpr(l, r) => {
+      
+    }
+    case Iszero(c) => {
+      
+    }
+    case Ite(c, t, f) => {
+      
+    }
+    case Let(i, v, body) => {
+      
+    }
+    case Proc(args) => {
+      
+    }
+    case Asn(v, e) => {
+      
+    }
+    case BeginEnd(expr) => {
+      
+    }
+    case FieldAccess(record, field) => {
+      
+    }
+    case FieldAssign(record, field, new_val) => {
+      
+    }
+    case Block(f, s) => {
+      
+    }
+    case PCallV(ftn, arg) => {
+      
+    }
+    case PCallR(ftn, arg) => {
+      
+    }
+    case WhileExpr(cond, body) => {
+      
+    }
+    case class RecordExpr(field, initVal, next) => {
+      
+    }
+  }
 
   def gc(env: Env, mem: Mem): Mem = {
     Mem(mem.m, mem.top)
