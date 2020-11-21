@@ -81,22 +81,25 @@ object MiniCInterpreter {
   
   def eval(env: Env, mem: Mem, expr: Expr): Result = expr match {
     case Skip => {
-      
+      Result(SkipVal, mem);
     }
     case False => {
-      
+      Result(BoolVal(false), mem);
     }
     case True => {
-      
+      Result(BoolVal(true), mem);
     }
     case NotExpr(expr) => {
-      
+      // ? What to do here ?
+      throw new UndefinedSemantics(s"${expr} is not an expression!");
     }
     case Const(n) => {
-      
+      Result(IntVal(n), mem);
     }
     case Var(s) => {
-      
+      if (env.contains(s)) 
+        if (mem.m.contains(env(s))) mem.m(env(s)) else throw new UndefinedSemantics(s"LocVal ${env(s)} is not bound to a value");
+      else throw new UndefinedSemantics(s"The environment does not have ${s}");
     }
     case Add(l, r) => {
       
@@ -125,8 +128,8 @@ object MiniCInterpreter {
     case Let(i, v, body) => {
       
     }
-    case Proc(args) => {
-      
+    case Proc(args, expr) =>
+      // ? How to treat the list of args ?
     }
     case Asn(v, e) => {
       
