@@ -89,9 +89,12 @@ object MiniCInterpreter {
     case True => {
       Result(BoolVal(true), mem);
     }
-    case NotExpr(expr) => {
-      // ? What to do here ?
-      throw new UndefinedSemantics(s"${expr} is not an expression!");
+    case NotExpr(bool_expr) => {
+      val result = eval(env, mem, bool_expr);
+      result.v match {
+        case BoolVal(b) => Result(BoolVal(!b), result.m);
+        case _ => throw new UndefinedSemantics(s"No semantics for not ${result.v}");
+      }
     }
     case Const(n) => {
       Result(IntVal(n), mem);
@@ -102,16 +105,36 @@ object MiniCInterpreter {
       else throw new UndefinedSemantics(s"The environment does not have ${s}");
     }
     case Add(l, r) => {
-
+      val sinistra = eval(env, mem, l);
+      val dextra = eval(env, sinistra.m, r);
+      (sinistra.v, dextra.v) match {
+        case (left_expr: IntVal, right_expr: IntVal) => Result(left_expr.n + right_expr.n, dextra.m);
+        case _ => throw new UndefinedSemantics(s"No semantics for ${sinistra.v} + ${dextra.v}");
+      }
     }
     case Sub(l, r) => {
-
+      val sinistra = eval(env, mem, l);
+      val dextra = eval(env, sinistra.m, r);
+      (sinistra.v, dextra.v) match {
+        case (left_expr: IntVal, right_expr: IntVal) => Result(left_expr.n - right_expr.n, dextra.m);
+        case _ => throw new UndefinedSemantics(s"No semantics for ${sinistra.v} - ${dextra.v}");
+      }
     }
     case Mul(l, r) => {
-
+      val sinistra = eval(env, mem, l);
+      val dextra = eval(env, sinistra.m, r);
+      (sinistra.v, dextra.v) match {
+        case (left_expr: IntVal, right_expr: IntVal) => Result(left_expr.n * right_expr.n, dextra.m);
+        case _ => throw new UndefinedSemantics(s"No semantics for ${sinistra.v} * ${dextra.v}");
+      }
     }
     case Div(l, r) => {
-
+      val sinistra = eval(env, mem, l);
+      val dextra = eval(env, sinistra.m, r);
+      (sinistra.v, dextra.v) match {
+        case (left_expr: IntVal, right_expr: IntVal) => Result(left_expr.n / right_expr.n, dextra.m);
+        case _ => throw new UndefinedSemantics(s"No semantics for ${sinistra.v} / ${dextra.v}");
+      }
     }
     case LTEExpr(l, r) => {
 
