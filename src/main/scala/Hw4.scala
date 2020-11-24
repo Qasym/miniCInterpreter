@@ -157,7 +157,7 @@ object MiniCInterpreter {
         case _ => throw new UndefinedSemantics(s"No semantics for ${sinistra.v} == ${dextra.v}");
       }
     }
-    case Iszero(c) => {
+    case Iszero(c) => { //! provided pdf does not have semantics for this
       val resulten = eval(env, mem, c);
       resulten.v match {
         case IntVal(n) => Result(BoolVal(n == 0), resulten.m);
@@ -178,13 +178,14 @@ object MiniCInterpreter {
 
     }
     case Proc(args, expr) =>
-      // ? How to treat the list of args ?
+      //? How to treat the list of args?
     }
     case Asn(v, e) => {
 
     }
     case BeginEnd(expr) => {
-
+      val resulten = eval(env, mem, expr);
+      Result(resulten.v, resulten.m);
     }
     case FieldAccess(record, field) => {
 
@@ -193,7 +194,9 @@ object MiniCInterpreter {
 
     }
     case Block(f, s) => {
-
+      val primus = eval(env, mem, f);
+      val secundus = eval(env, primus.m, s);
+      Result(secundus.v, secundus.m);
     }
     case PCallV(ftn, arg) => {
 
@@ -202,7 +205,17 @@ object MiniCInterpreter {
 
     }
     case WhileExpr(cond, body) => {
-
+      val condition = eval(env, mem, cond);
+      condition.v match {
+        case BoolVal(b) => {
+          if (b) {
+            val resulten = eval(env, condition.m, body);
+            eval(env, resulten.m, WhileExpr(cond, body));
+          }
+          else Result(SkipVal, condition.m);
+        }
+        case _ => throw new UndefinedSemantics(s"No semantics for while ${condition.v}");
+      }
     }
     case class RecordExpr(field, initVal, next) => {
 
