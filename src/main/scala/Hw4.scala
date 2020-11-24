@@ -101,7 +101,8 @@ object MiniCInterpreter {
     }
     case Var(s) => {
       if (env.contains(s)) 
-        if (mem.m.contains(env(s))) mem.m(env(s)) else throw new UndefinedSemantics(s"LocVal ${env(s)} is not bound to a value");
+        if (mem.m.contains(env(s))) Result(mem.m(env(s)), mem);
+        else throw new UndefinedSemantics(s"LocVal ${env(s)} is not bound to a value");
       else throw new UndefinedSemantics(s"The environment does not have ${s}");
     }
     case Add(l, r) => {
@@ -175,13 +176,17 @@ object MiniCInterpreter {
       }
     }
     case Let(i, v, body) => {
-
+      val primus = eval(env, mem, v);
+      val new_env = env + i -> LocVal(primus.m.top + 1);
+      val new_mem = Mem(primus.m.m + LocVal(primus.m.top + 1) -> primus.v, primus.m.top + 2);
+      eval(new_env, new_mem, body);
     }
     case Proc(args, expr) =>
       //? How to treat the list of args?
     }
     case Asn(v, e) => {
-
+      val resulten = eval(env, mem, e);
+      Result(resulten.v, Mem(resulten.m.m + env(v) -> resulten.v, resulten.m.top + 1);
     }
     case BeginEnd(expr) => {
       val resulten = eval(env, mem, expr);
@@ -217,9 +222,10 @@ object MiniCInterpreter {
         case _ => throw new UndefinedSemantics(s"No semantics for while ${condition.v}");
       }
     }
-    case class RecordExpr(field, initVal, next) => {
+    case RecordExpr(field, initVal, next) => {
 
     }
+    case EmptyRecordExpr => Result(EmptyRecordVal, mem);
   }
 
   def gc(env: Env, mem: Mem): Mem = {
