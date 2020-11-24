@@ -108,7 +108,7 @@ object MiniCInterpreter {
       val sinistra = eval(env, mem, l);
       val dextra = eval(env, sinistra.m, r);
       (sinistra.v, dextra.v) match {
-        case (left_expr: IntVal, right_expr: IntVal) => Result(left_expr.n + right_expr.n, dextra.m);
+        case (left_expr: IntVal, right_expr: IntVal) => Result(IntVal(left_expr.n + right_expr.n), dextra.m);
         case _ => throw new UndefinedSemantics(s"No semantics for ${sinistra.v} + ${dextra.v}");
       }
     }
@@ -116,7 +116,7 @@ object MiniCInterpreter {
       val sinistra = eval(env, mem, l);
       val dextra = eval(env, sinistra.m, r);
       (sinistra.v, dextra.v) match {
-        case (left_expr: IntVal, right_expr: IntVal) => Result(left_expr.n - right_expr.n, dextra.m);
+        case (left_expr: IntVal, right_expr: IntVal) => Result(IntVal(left_expr.n - right_expr.n), dextra.m);
         case _ => throw new UndefinedSemantics(s"No semantics for ${sinistra.v} - ${dextra.v}");
       }
     }
@@ -124,7 +124,7 @@ object MiniCInterpreter {
       val sinistra = eval(env, mem, l);
       val dextra = eval(env, sinistra.m, r);
       (sinistra.v, dextra.v) match {
-        case (left_expr: IntVal, right_expr: IntVal) => Result(left_expr.n * right_expr.n, dextra.m);
+        case (left_expr: IntVal, right_expr: IntVal) => Result(IntVal(left_expr.n * right_expr.n), dextra.m);
         case _ => throw new UndefinedSemantics(s"No semantics for ${sinistra.v} * ${dextra.v}");
       }
     }
@@ -132,15 +132,29 @@ object MiniCInterpreter {
       val sinistra = eval(env, mem, l);
       val dextra = eval(env, sinistra.m, r);
       (sinistra.v, dextra.v) match {
-        case (left_expr: IntVal, right_expr: IntVal) => Result(left_expr.n / right_expr.n, dextra.m);
+        case (left_expr: IntVal, right_expr: IntVal) => {
+          if (right_expr.n == 0) throw new UndefinedSemantics("Division by zero");
+          else Result(IntVal(left_expr.n / right_expr.n), dextra.m);
+        }  
         case _ => throw new UndefinedSemantics(s"No semantics for ${sinistra.v} / ${dextra.v}");
       }
     }
     case LTEExpr(l, r) => {
-
+      val sinistra = eval(env, mem, l);
+      val dextra = eval(env, sinistra.m, r);
+      (sinistra.v, dextra.v) match {
+        case (left_expr: IntVal, right_expr: IntVal) => Result(BoolVal(left_expr.n <= right_expr.n), dextra.m);
+        case _ => throw new UndefinedSemantics(s"No semantics for ${sinistra.v} <= ${dextra.v}");
+      }
     }
     case EQExpr(l, r) => {
-
+      val sinistra = eval(env, mem, l);
+      val dextra = eval(env, sinistra.m, r);
+      (sinistra.v, dextra.v) match {
+        case (left_expr: IntVal, right_expr: IntVal) => Result(BoolVal(left_expr.n == right_expr.n), dextra.m);
+        case (left_expr: BoolVal, right_expr: BoolVal) => Result(BoolVal(left_expr.b == right_expr.b), dextra.m);
+        case _ => throw new UndefinedSemantics(s"No semantics for ${sinistra.v} == ${dextra.v}");
+      }
     }
     case Iszero(c) => {
 
