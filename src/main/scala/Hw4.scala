@@ -153,14 +153,26 @@ object MiniCInterpreter {
       (sinistra.v, dextra.v) match {
         case (left_expr: IntVal, right_expr: IntVal) => Result(BoolVal(left_expr.n == right_expr.n), dextra.m);
         case (left_expr: BoolVal, right_expr: BoolVal) => Result(BoolVal(left_expr.b == right_expr.b), dextra.m);
+        case (left_expr: SkipVal, right_expr: SkipVal) => Result(BoolVal(true), dextra.m);
         case _ => throw new UndefinedSemantics(s"No semantics for ${sinistra.v} == ${dextra.v}");
       }
     }
     case Iszero(c) => {
-
+      val resulten = eval(env, mem, c);
+      resulten.v match {
+        case IntVal(n) => Result(BoolVal(n == 0), resulten.m);
+        case _ => throw new UndefinedSemantics(s"No semantics for iszero(${resulten.v})")
+      }
     }
     case Ite(c, t, f) => {
-
+      val condition = eval(env, mem, c);
+      condition.v match {
+        case BoolVal(b) => {
+          if (b) eval(env, condition.m, t);
+          else eval(env, condition.m, f);
+        }
+        case _ => throw new UndefinedSemantics(s"No semantics for if ${condition.v}");
+      }
     }
     case Let(i, v, body) => {
 
