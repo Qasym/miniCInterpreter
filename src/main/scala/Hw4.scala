@@ -183,6 +183,8 @@ object MiniCInterpreter {
     }
     case Proc(args, expr) =>
       //? How to treat the list of args?
+      // TODO:  I have to finish this
+      
     }
     case Asn(v, e) => {
       val resulten = eval(env, mem, e);
@@ -193,10 +195,10 @@ object MiniCInterpreter {
       Result(resulten.v, resulten.m);
     }
     case FieldAccess(record, field) => {
-
+      // TODO:  I have to finish this
     }
     case FieldAssign(record, field, new_val) => {
-
+      // TODO:  I have to finish this
     }
     case Block(f, s) => {
       val primus = eval(env, mem, f);
@@ -204,10 +206,10 @@ object MiniCInterpreter {
       Result(secundus.v, secundus.m);
     }
     case PCallV(ftn, arg) => {
-
+      // TODO:  I have to finish this
     }
     case PCallR(ftn, arg) => {
-
+      // TODO:  I have to finish this
     }
     case WhileExpr(cond, body) => {
       val condition = eval(env, mem, cond);
@@ -223,7 +225,10 @@ object MiniCInterpreter {
       }
     }
     case RecordExpr(field, initVal, next) => {
-
+      // TODO:  I have to finish this
+      val resulten = eval(env, mem, initVal);
+      val new_mem = resulten.m.extended(resulten.v);
+      Result(RecordVal(field, LocVal(resulten.m.top), eval(env, new_mem, next)));
     }
     case EmptyRecordExpr => Result(EmptyRecordVal, mem);
   }
