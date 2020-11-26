@@ -82,7 +82,7 @@ object MiniCInterpreter {
   def varToVal(params: List[Var], args: List[Var], paramEnv: Env, argsEnv: Env, itr: Int): Env = {
     if (params.size == itr) paramEnv;
     else {
-      if (!argsEnv.contains(args(itr))) throw new UndefinedSemantics(s"Environment does not have ${args(itr)}");
+      if (!argsEnv.contains(args(itr))) throw new UndefinedSemantics(s"Environment ${argsEnv} does not have ${args(itr)}");
       val new_env: Env = paramEnv + (params(itr) -> argsEnv(args(itr)));
       varToVal(params, args, new_env, argsEnv, itr + 1);
     }
