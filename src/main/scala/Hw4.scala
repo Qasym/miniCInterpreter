@@ -81,26 +81,34 @@ object MiniCInterpreter {
   
   def varToVal(params: List[Var], args: List[Var], paramEnv: Env, argsEnv: Env, itr: Int): Env = {
     if (params.size == itr) paramEnv;
-    val new_env: Env = paramEnv + (params(itr) -> argsEnv(args(itr)));
-    varToVal(params, args, new_env, argsEnv, itr + 1);
+    else {
+      val new_env: Env = paramEnv + (params(itr) -> argsEnv(args(itr)));
+      varToVal(params, args, new_env, argsEnv, itr + 1);
+    }
   }
 
   def evalList(exprs: List[Expr], vals: List[Val], env: Env, mem: Mem, itr: Int): Tuple2[List[Val], Mem] = {
     if (exprs.size == itr) (vals, mem);
-    val valorem = eval(env, mem, exprs(itr));
-    evalList(exprs, valorem.v :: vals, env, valorem.m, itr + 1);
+    else {
+      val valorem = eval(env, mem, exprs(itr));
+      evalList(exprs, valorem.v :: vals, env, valorem.m, itr + 1);
+    }
   }
 
   def varToLoc(vars: List[Var], funcEnv: Env, top_mem: Int, itr: Int): Env = {
     if (vars.size == itr) funcEnv;
-    val new_env: Env = funcEnv + (vars(itr) -> LocVal(top_mem));
-    varToLoc(vars, new_env, top_mem + 1, itr + 1);
+    else {
+      val new_env: Env = funcEnv + (vars(itr) -> LocVal(top_mem));
+      varToLoc(vars, new_env, top_mem + 1, itr + 1);
+    }
   }
 
   def locToVal(top_mem: Int, vals: List[Val], mem: Mem, itr: Int): Mem = {
     if (vals.size == itr) mem;
-    val new_mem: Mem = Mem(mem.m + (LocVal(top_mem) -> vals(itr)), top_mem + 1);
-    locToVal(top_mem + 1, vals, new_mem, itr + 1);
+    else {
+      val new_mem: Mem = Mem(mem.m + (LocVal(top_mem) -> vals(itr)), top_mem + 1);
+      locToVal(top_mem + 1, vals, new_mem, itr + 1);
+    }
   }
 
   def accessField(rec: Val, field: Var): LocVal = rec match {
