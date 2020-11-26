@@ -137,11 +137,12 @@ object MiniCInterpreter {
     case Const(n) => {
       Result(IntVal(n), mem);
     }
-    case Var(s) => {
-      if (env.contains(Var(s))) 
-        if (mem.m.contains(env(Var(s)))) Result(mem.m(env(Var(s))), mem);
-        else throw new UndefinedSemantics(s"LocVal ${env(Var(s))} is not bound to a value");
-      else throw new UndefinedSemantics(s"The environment does not have ${s}");
+    case (vrbl: Var) => {
+      if (env.contains(vrbl)) {
+        if (mem.m.contains(env(vrbl))) Result(mem.m(env(vrbl)), mem);
+        else throw new UndefinedSemantics(s"LocVal ${env(vrbl)} is not bound to a value");
+      }
+      else throw new UndefinedSemantics(s"The environment does not have ${vrbl}");
     }
     case Add(l, r) => {
       val sinistra = eval(env, mem, l);
@@ -222,6 +223,7 @@ object MiniCInterpreter {
     case Proc(args, expr) => Result(ProcVal(args, expr, env), mem);
     case Asn(v, e) => {
       val resulten = eval(env, mem, e);
+      if (!env.contains(v)) throw new UndefinedSemantics(s"Environment does not have ${v}");
       Result(resulten.v, Mem(resulten.m.m + (env(v) -> resulten.v), resulten.m.top + 1));
     }
     case BeginEnd(expr) => {
