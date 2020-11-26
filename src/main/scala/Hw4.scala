@@ -103,6 +103,12 @@ object MiniCInterpreter {
     locToVal(top_mem + 1, vals, new_mem, itr + 1);
   }
 
+  def accessField(rec: RecordValLike, field: Var): LocVal = rec match {
+    case (rcrd: RecordVal) => if (rcrd.field == field) rcrd.loc;
+                              else accessField(rcrd.next, field);
+    case _ => throw new UndefinedSemantics(s"No such field as ${field}");
+  }
+
   def eval(env: Env, mem: Mem, expr: Expr): Result = expr match {
     case Skip => {
       Result(SkipVal, mem);
@@ -217,10 +223,14 @@ object MiniCInterpreter {
       Result(resulten.v, resulten.m);
     }
     case FieldAccess(record, field) => {
-      // TODO:  I have to finish this
+      val rec = eval(env, mem, record);
+      Result(rec.m.get(accessField(rec.v, field)), rec.m);
     }
     case FieldAssign(record, field, new_val) => {
-      // TODO:  I have to finish this
+      val rec = eval(env, mem, record);
+      val valorem = eval(env, rec.m, new_val);
+      val new_mem = Mem(valorem.m.m + accessField(rec.v, field) -> valorem.v, valorem.m.top + 1);
+      Result(valorem.v, new_mem);
     }
     case Block(f, s) => {
       val primus = eval(env, mem, f);
@@ -228,11 +238,10 @@ object MiniCInterpreter {
       Result(secundus.v, secundus.m);
     }
     case PCallV(ftn, arg) => {
-      // TODO:  I have to finish this
       val proc = eval(env, mem, ftn);
       val vals_mem = evalList(arg, Nil, env, mem, 0); //* This is a tuple of values and memory;
       val new_env = varToLoc(proc.v.args, proc.v.env, vals_mem._2.top + 1, 0); //* This is an env with x1->l1
-      val new_mem = locToVal(vals_mem._2.top + 1, vals_mem._1, vals_mem._2, 0);
+      val new_mem = locToVal(vals_mem._2.top + 1, vals_mem._1, vals_mem._2, 0); //* This is a mem with l1->v1
       eval(new_env, new_mem, proc.v.expr);
     }
     case PCallR(ftn, arg) => {
@@ -254,7 +263,6 @@ object MiniCInterpreter {
       }
     }
     case RecordExpr(field, initVal, next) => {
-      // TODO:  I have to finish this
       val resulten = eval(env, mem, initVal);
       val new_mem = resulten.m.extended(resulten.v);
       Result(RecordVal(field, LocVal(resulten.m.top), eval(env, new_mem, next)));
