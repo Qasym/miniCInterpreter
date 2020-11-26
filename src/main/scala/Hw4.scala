@@ -81,7 +81,7 @@ object MiniCInterpreter {
   
   def varToVal(params: List[Var], args: List[Var], paramEnv: Env, argsEnv: Env, itr: Int): Env = {
     if (params.size == itr) paramEnv;
-    val new_env: Env = paramEnv + params(itr) -> argsEnv(args(itr));
+    val new_env: Env = paramEnv + (params(itr) -> argsEnv(args(itr)));
     varToVal(params, args, new_env, argsEnv, itr + 1);
   }
 
@@ -93,17 +93,17 @@ object MiniCInterpreter {
 
   def varToLoc(vars: List[Var], funcEnv: Env, top_mem: Int, itr: Int): Env = {
     if (vars.size == itr) funcEnv;
-    val new_env: Env = funcEnv + vars(itr) -> LocVal(top_mem);
+    val new_env: Env = funcEnv + (vars(itr) -> LocVal(top_mem));
     varToLoc(vars, new_env, top_mem + 1, itr + 1);
   }
 
   def locToVal(top_mem: Int, vals: List[Val], mem: Mem, itr: Int): Mem = {
     if (vals.size == itr) mem;
-    val new_mem: Mem = Mem(mem.m + LocVal(top_mem) -> vals(itr), top_mem + 1);
+    val new_mem: Mem = Mem(mem.m + (LocVal(top_mem) -> vals(itr)), top_mem + 1);
     locToVal(top_mem + 1, vals, new_mem, itr + 1);
   }
 
-  def accessField(rec: RecordValLike, field: Var): LocVal = rec match {
+  def accessField(rec: Val, field: Var): LocVal = rec match {
     case (rcrd: RecordVal) => if (rcrd.field == field) rcrd.loc;
                               else accessField(rcrd.next, field);
     case _ => throw new UndefinedSemantics(s"No such field as ${field}");
@@ -130,9 +130,9 @@ object MiniCInterpreter {
       Result(IntVal(n), mem);
     }
     case Var(s) => {
-      if (env.contains(s)) 
-        if (mem.m.contains(env(s))) Result(mem.m(env(s)), mem);
-        else throw new UndefinedSemantics(s"LocVal ${env(s)} is not bound to a value");
+      if (env.contains(Var(s))) 
+        if (mem.m.contains(env(Var(s)))) Result(mem.m(env(Var(s))), mem);
+        else throw new UndefinedSemantics(s"LocVal ${env(Var(s))} is not bound to a value");
       else throw new UndefinedSemantics(s"The environment does not have ${s}");
     }
     case Add(l, r) => {
@@ -184,7 +184,7 @@ object MiniCInterpreter {
       (sinistra.v, dextra.v) match {
         case (left_expr: IntVal, right_expr: IntVal) => Result(BoolVal(left_expr.n == right_expr.n), dextra.m);
         case (left_expr: BoolVal, right_expr: BoolVal) => Result(BoolVal(left_expr.b == right_expr.b), dextra.m);
-        case (left_expr: SkipVal, right_expr: SkipVal) => Result(BoolVal(true), dextra.m);
+        case (SkipVal, SkipVal) => Result(BoolVal(true), dextra.m);
         case _ => throw new UndefinedSemantics(s"No semantics for ${sinistra.v} == ${dextra.v}");
       }
     }
@@ -207,16 +207,14 @@ object MiniCInterpreter {
     }
     case Let(i, v, body) => {
       val primus = eval(env, mem, v);
-      val new_env = env + i -> LocVal(primus.m.top + 1);
-      val new_mem = Mem(primus.m.m + LocVal(primus.m.top + 1) -> primus.v, primus.m.top + 2);
+      val new_env = env + (i -> LocVal(primus.m.top + 1));
+      val new_mem = Mem(primus.m.m + (LocVal(primus.m.top + 1) -> primus.v), primus.m.top + 2);
       eval(new_env, new_mem, body);
     }
-    case Proc(args, expr) =>
-      Result(ProcVal(args, expr, env), mem);
-    }
+    case Proc(args, expr) => Result(ProcVal(args, expr, env), mem);
     case Asn(v, e) => {
       val resulten = eval(env, mem, e);
-      Result(resulten.v, Mem(resulten.m.m + env(v) -> resulten.v, resulten.m.top + 1);
+      Result(resulten.v, Mem(resulten.m.m + (env(v) -> resulten.v), resulten.m.top + 1));
     }
     case BeginEnd(expr) => {
       val resulten = eval(env, mem, expr);
@@ -224,12 +222,12 @@ object MiniCInterpreter {
     }
     case FieldAccess(record, field) => {
       val rec = eval(env, mem, record);
-      Result(rec.m.get(accessField(rec.v, field)), rec.m);
+      Result(rec.m.m(accessField(rec.v, field)), rec.m);
     }
     case FieldAssign(record, field, new_val) => {
       val rec = eval(env, mem, record);
       val valorem = eval(env, rec.m, new_val);
-      val new_mem = Mem(valorem.m.m + accessField(rec.v, field) -> valorem.v, valorem.m.top + 1);
+      val new_mem = Mem(valorem.m.m + (accessField(rec.v, field) -> valorem.v), valorem.m.top + 1);
       Result(valorem.v, new_mem);
     }
     case Block(f, s) => {
@@ -240,14 +238,24 @@ object MiniCInterpreter {
     case PCallV(ftn, arg) => {
       val proc = eval(env, mem, ftn);
       val vals_mem = evalList(arg, Nil, env, mem, 0); //* This is a tuple of values and memory;
-      val new_env = varToLoc(proc.v.args, proc.v.env, vals_mem._2.top + 1, 0); //* This is an env with x1->l1
-      val new_mem = locToVal(vals_mem._2.top + 1, vals_mem._1, vals_mem._2, 0); //* This is a mem with l1->v1
-      eval(new_env, new_mem, proc.v.expr);
+      proc.v match {
+        case (procv: ProcVal) => {
+          val new_env = varToLoc(procv.args, procv.env, vals_mem._2.top + 1, 0); //* This is an env with x1->l1
+          val new_mem = locToVal(vals_mem._2.top + 1, vals_mem._1, vals_mem._2, 0); //* This is a mem with l1->v1
+          eval(new_env, new_mem, procv.expr);
+        }
+        case _ => throw new UndefinedSemantics(s"${proc.v} is not a ProcVal!");
+      }
     }
     case PCallR(ftn, arg) => {
       val proc = eval(env, mem, ftn);
-      if (arg.size != prov.v.args.size) throw new UndefinedSemantics("Not enough arguments for the procedure");
-      eval(varToVal(proc.v.args, arg, proc.v.env, env, 0), proc.m);
+      proc.v match {
+        case (procv: ProcVal) => {
+          if (arg.size != procv.args.size) throw new UndefinedSemantics("Not enough arguments for the procedure");
+          eval(varToVal(procv.args, arg, procv.env, env, 0), proc.m, procv.expr);
+        }
+        case _ => throw new UndefinedSemantics(s"${proc.v} is not a ProcVal!");
+      }
     }
     case WhileExpr(cond, body) => {
       val condition = eval(env, mem, cond);
@@ -265,7 +273,16 @@ object MiniCInterpreter {
     case RecordExpr(field, initVal, next) => {
       val resulten = eval(env, mem, initVal);
       val new_mem = resulten.m.extended(resulten.v);
-      Result(RecordVal(field, LocVal(resulten.m.top), eval(env, new_mem, next)));
+      next match {
+        case (rcrd: RecordExpr) => {
+          val nextRec = eval(env, new_mem._1, rcrd);
+          nextRec.v match {
+            case (_nextRec: RecordValLike) => Result(RecordVal(field, LocVal(resulten.m.top), _nextRec), nextRec.m);
+            case _ => throw new UndefinedSemantics(s"Undefined Semantics for ${nextRec}");
+          }
+        }
+        case EmptyRecordExpr => Result(RecordVal(field, LocVal(resulten.m.top), EmptyRecordVal), new_mem._1);
+      }
     }
     case EmptyRecordExpr => Result(EmptyRecordVal, mem);
   }
