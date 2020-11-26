@@ -75,10 +75,34 @@ case class RecordExpr(field: Var, initVal: Expr, next: RecordLike) extends Recor
 
 object MiniCInterpreter {
 
-  case class Result(v: Val, m: Mem)
-  case class UndefinedSemantics(msg: String = "", cause: Throwable = None.orNull) extends Exception("Undefined Semantics: " ++ msg, cause)
+  case class Result(v: Val, m: Mem);
+  case class UndefinedSemantics(msg: String = "", cause: Throwable = None.orNull) extends Exception("Undefined Semantics: " ++ msg, cause);
     
   
+  def varToVal(params: List[Var], args: List[Var], paramEnv: Env, argsEnv: Env, itr: Int): Env = {
+    if (params.size == itr) paramEnv;
+    val new_env: Env = paramEnv + params(itr) -> argsEnv(args(itr));
+    varToVal(params, args, new_env, argsEnv, itr + 1);
+  }
+
+  def evalList(exprs: List[Expr], vals: List[Val], env: Env, mem: Mem, itr: Int): Tuple2[List[Val], Mem] = {
+    if (exprs.size == itr) (vals, mem);
+    val valorem = eval(env, mem, exprs(itr));
+    evalList(exprs, valorem.v :: vals, env, valorem.m, itr + 1);
+  }
+
+  def varToLoc(vars: List[Var], funcEnv: Env, top_mem: Int, itr: Int): Env = {
+    if (vars.size == itr) funcEnv;
+    val new_env: Env = funcEnv + vars(itr) -> LocVal(top_mem);
+    varToLoc(vars, new_env, top_mem + 1, itr + 1);
+  }
+
+  def locToVal(top_mem: Int, vals: List[Val], mem: Mem, itr: Int): Mem = {
+    if (vals.size == itr) mem;
+    val new_mem: Mem = Mem(mem.m + LocVal(top_mem) -> vals(itr), top_mem + 1);
+    locToVal(top_mem + 1, vals, new_mem, itr + 1);
+  }
+
   def eval(env: Env, mem: Mem, expr: Expr): Result = expr match {
     case Skip => {
       Result(SkipVal, mem);
@@ -182,9 +206,7 @@ object MiniCInterpreter {
       eval(new_env, new_mem, body);
     }
     case Proc(args, expr) =>
-      //? How to treat the list of args?
-      // TODO:  I have to finish this
-      
+      Result(ProcVal(args, expr, env), mem);
     }
     case Asn(v, e) => {
       val resulten = eval(env, mem, e);
@@ -207,9 +229,16 @@ object MiniCInterpreter {
     }
     case PCallV(ftn, arg) => {
       // TODO:  I have to finish this
+      val proc = eval(env, mem, ftn);
+      val vals_mem = evalList(arg, Nil, env, mem, 0); //* This is a tuple of values and memory;
+      val new_env = varToLoc(proc.v.args, proc.v.env, vals_mem._2.top + 1, 0); //* This is an env with x1->l1
+      val new_mem = locToVal(vals_mem._2.top + 1, vals_mem._1, vals_mem._2, 0);
+      eval(new_env, new_mem, proc.v.expr);
     }
     case PCallR(ftn, arg) => {
-      // TODO:  I have to finish this
+      val proc = eval(env, mem, ftn);
+      if (arg.size != prov.v.args.size) throw new UndefinedSemantics("Not enough arguments for the procedure");
+      eval(varToVal(proc.v.args, arg, proc.v.env, env, 0), proc.m);
     }
     case WhileExpr(cond, body) => {
       val condition = eval(env, mem, cond);
@@ -234,6 +263,7 @@ object MiniCInterpreter {
   }
 
   def gc(env: Env, mem: Mem): Mem = {
+    // TODO: Implement this method!
     Mem(mem.m, mem.top)
   }
   
