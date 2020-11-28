@@ -298,11 +298,21 @@ object MiniCInterpreter {
     case EmptyRecordExpr => Result(EmptyRecordVal, mem);
   }
 
-  def loc_val(loc: LocVal, mem: Mem, new_mem: Mem): Mem = {
+  def loc_loc(loc: LocVal, mem: Mem, new_mem: Mem): Mem = {
     if (mem.m(loc).isInstanceOf(LocVal)) 
       Mem(new_mem.m + loc_val(mem.m(loc), mem), mem.top);
     else
       Mem(new_mem.m + (loc -> mem.m(loc)), mem.top);
+  }
+
+  def record_loc(rec: RecordValLike, mem: Mem, new_mem: Mem): Mem = {
+    rec match {
+      case (rcrd: RecordVal) => {
+        val local_mem = Mem(new_mem.m + (rcrd.loc -> mem.m(rcrd.loc)), mem.top);
+        record_loc(rcrd.next, mem, local_mem);
+      }
+      case (EmptyRecordVal) => new_mem;
+    }
   }
 
   def gc(env: Env, mem: Mem): Mem = {
@@ -311,9 +321,9 @@ object MiniCInterpreter {
     env.keys.foreach { key =>
       if (mem.m.contains(env(key))) {
         mem.m(env(key)) match {
-          case (value: ProcVal) =>
-          case (value: RecordVal) => 
-          case (value: LocVal) => loc_val(value, mem, new_mem);
+          case (value: ProcVal) => 
+          case (value: RecordValLike) => record_loc(value, mem, new_mem);
+          case (value: LocVal) => loc_loc(value, mem, new_mem);
           case _ => Mem(new_mem.m + (env(key) -> _), mem.top);
         }
       }
