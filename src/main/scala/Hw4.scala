@@ -298,37 +298,19 @@ object MiniCInterpreter {
     case EmptyRecordExpr => Result(EmptyRecordVal, mem);
   }
 
-  def loc_loc(loc: LocVal, mem: Mem, new_mem: Mem): Mem = {
-    if (mem.m(loc).isInstanceOf(LocVal)) 
-      Mem(new_mem.m + loc_val(mem.m(loc), mem), mem.top);
-    else
-      Mem(new_mem.m + (loc -> mem.m(loc)), mem.top);
-  }
-
-  def record_loc(rec: RecordValLike, mem: Mem, new_mem: Mem): Mem = {
-    rec match {
-      case (rcrd: RecordVal) => {
-        val local_mem = Mem(new_mem.m + (rcrd.loc -> mem.m(rcrd.loc)), mem.top);
-        record_loc(rcrd.next, mem, local_mem);
-      }
-      case (EmptyRecordVal) => new_mem;
+  def gcHelper(locs: List[LocVal], itr: Int, mem: Mem, new_mem: Mem): Mem = {
+    if (locs.size == itr) new_mem;
+    else {
+      gcHelper(locs, itr + 1, mem, Mem(new_mem.m + (locs(itr) -> mem.m(locs(itr))), mem.top);
     }
   }
 
   def gc(env: Env, mem: Mem): Mem = {
     //? How to do it recursively?
-    val new_mem: Mem = Mem(new HashMap[LocVal,Val], 0);
-    env.keys.foreach { key =>
-      if (mem.m.contains(env(key))) {
-        mem.m(env(key)) match {
-          case (value: ProcVal) => 
-          case (value: RecordValLike) => record_loc(value, mem, new_mem);
-          case (value: LocVal) => loc_loc(value, mem, new_mem);
-          case _ => Mem(new_mem.m + (env(key) -> _), mem.top);
-        }
-      }
-      return;
-    }
+    val roots: List[LocVal] = env.values.toList
+    val new_mem = Mem(new HashMap[LocVal,Val], 0);
+    val memPrototype = gcHelper(roots, 0, mem, new_mem);
+    
   }
   
   def apply(program: String): (Val, Mem) = {
