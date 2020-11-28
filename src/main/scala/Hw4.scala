@@ -298,9 +298,27 @@ object MiniCInterpreter {
     case EmptyRecordExpr => Result(EmptyRecordVal, mem);
   }
 
+  def loc_val(loc: LocVal, mem: Mem, new_mem: Mem): Mem = {
+    if (mem.m(loc).isInstanceOf(LocVal)) 
+      Mem(new_mem.m + loc_val(mem.m(loc), mem), mem.top);
+    else
+      Mem(new_mem.m + (loc -> mem.m(loc)), mem.top);
+  }
+
   def gc(env: Env, mem: Mem): Mem = {
-    // TODO: Implement this method!
-    Mem(mem.m, mem.top)
+    //? How to do it recursively?
+    val new_mem: Mem = Mem(new HashMap[LocVal,Val], 0);
+    env.keys.foreach { key =>
+      if (mem.m.contains(env(key))) {
+        mem.m(env(key)) match {
+          case (value: ProcVal) =>
+          case (value: RecordVal) => 
+          case (value: LocVal) => loc_val(value, mem, new_mem);
+          case _ => Mem(new_mem.m + (env(key) -> _), mem.top);
+        }
+      }
+      return;
+    }
   }
   
   def apply(program: String): (Val, Mem) = {
