@@ -309,7 +309,10 @@ object MiniCInterpreter {
           case _ => throw new UndefinedSemantics("You are not supposed to see this")
         }
       }
-      case (value: ProcVal) => gc(value.env, mem);
+      case (value: ProcVal) => {
+        val procMem = gc(value.env, mem);
+        Mem(clean_mem.m. ++ (procMem.m), mem.top)
+      }
       case (value: RecordVal) => {
         val new_mem = Mem(clean_mem.m + (value.loc -> mem.m(value.loc)), mem.top);
         gcHelper(new_mem, mem, env, value.loc, mem.m(value.loc));
