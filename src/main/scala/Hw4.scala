@@ -298,19 +298,8 @@ object MiniCInterpreter {
     case EmptyRecordExpr => Result(EmptyRecordVal, mem);
   }
 
-  def gcHelper(locs: List[LocVal], itr: Int, mem: Mem, new_mem: Mem): Mem = {
-    if (locs.size == itr) new_mem;
-    else {
-      gcHelper(locs, itr + 1, mem, Mem(new_mem.m + (locs(itr) -> mem.m(locs(itr))), mem.top);
-    }
-  }
-
   def gc(env: Env, mem: Mem): Mem = {
-    //? How to do it recursively?
-    val roots: List[LocVal] = env.values.toList
-    val new_mem = Mem(new HashMap[LocVal,Val], 0);
-    val memPrototype = gcHelper(roots, 0, mem, new_mem);
-    
+
   }
   
   def apply(program: String): (Val, Mem) = {
