@@ -315,7 +315,8 @@ object MiniCInterpreter {
       }
       case (value: RecordVal) => {
         val new_mem = Mem(clean_mem.m + (value.loc -> mem.m(value.loc)), mem.top);
-        gcHelper(new_mem, mem, env, value.loc, mem.m(value.loc));
+        val newer_mem = gcHelper(new_mem, mem, env, value.loc, mem.m(value.loc));
+        gcHelper(newer_mem, mem, env, myLoc, value.next);
       }
       case EmptyRecordVal => clean_mem;
       case (value: Any) => clean_mem; //* We return clean_mem because it already has myVal
