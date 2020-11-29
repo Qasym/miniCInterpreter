@@ -298,8 +298,41 @@ object MiniCInterpreter {
     case EmptyRecordExpr => Result(EmptyRecordVal, mem);
   }
 
-  def gc(env: Env, mem: Mem): Mem = {
+  def gcHelper(clean_mem: Mem, mem: Mem, env: Env, myLoc: LocVal, myVal: Val): Mem = {
+    myVal match {
+      case (value: LocVal) => {
+        val new_mem = Mem(clean_mem.m + (myVal -> mem.m(myVal)), mem.top);
+        gcHelper(new_mem, mem, env, myVal, mem.m(myVal));
+      }
+      case (value: ProcVal) => gc(value.env, mem);
+      // case (value: RecordValLike) => //* We don't need to consider RecordVals because we obtain their pointers through env
+      case (value: Any) => clean_mem; //* We return clean_mem because it already has myVal
+    }
+  }
 
+  def envToMem(locList: List[LocVal], itr: Int, new_mem: Mem, mem: Mem): Mem = {
+    if (itr == locList.size) new_mem;
+    else {
+      val newer_mem = Mem(new_mem.m + (locList(itr) -> mem.m(locList(itr))));
+      envToMem(loclist, itr + 1, newer_mem, mem);
+    }
+  }
+
+  def gcHelper2(locList: List[LocVal], itr: Int, clean_mem: Mem, mem: Mem, env: Env, myLoc: LocVal, myVal: Val): Mem = {
+    if (itr == locList.size - 1) gcHelper(clean_mem, mem, env, locList(itr), mem.m(locList(itr)));
+    else {
+      val new_mem = gcHelper(clean_mem, mem, env, locList(itr), mem.m(locList(itr)));
+      gcHelper2(locList, itr + 1, new_mem, mem, env, locList(itr + 1), mem.m(locList(itr + 1)));
+    } 
+  }
+
+  def gc(env: Env, mem: Mem): Mem = {
+    if (env.size == 0) Mem(new HashMap[LocVal,Val], 0);
+    else {
+      val locList = env.values.toList;
+      val new_mem = envToMem(locList, 0, Mem(new HashMap[LocVal,Val], 0), mem);
+      gcHelper2(locList, 0, new_mem, mem, env, locList(0), mem.m(locList(0)));
+    }
   }
   
   def apply(program: String): (Val, Mem) = {
