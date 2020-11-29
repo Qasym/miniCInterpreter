@@ -310,7 +310,11 @@ object MiniCInterpreter {
         }
       }
       case (value: ProcVal) => gc(value.env, mem);
-      // case (value: RecordValLike) => //* We don't need to consider RecordVals because we obtain their pointers through env
+      case (value: RecordVal) => {
+        val new_mem = Mem(clean_mem.m + (value.loc -> mem.m(value.loc)), mem.top);
+        gcHelper(new_mem, mem, env, value.loc, mem.m(value.loc));
+      }
+      case EmptyRecordVal => clean_mem;
       case (value: Any) => clean_mem; //* We return clean_mem because it already has myVal
     }
   }
