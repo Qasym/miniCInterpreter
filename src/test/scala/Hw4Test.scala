@@ -40,6 +40,13 @@ Mem(HashMap(LocVal(3) -> IntVal(13), LocVal(5) -> IntVal(9), LocVal(1) -> IntVal
   Mem(HashMap(LocVal(3) -> IntVal(13), LocVal(5) -> IntVal(9), LocVal(1) -> IntVal(10), LocVal(4) -> IntVal(21), LocVal(2) -> LocVal(3)),6),
   Mem(HashMap[LocVal,Val](LocVal(2) -> LocVal(3), LocVal(3) -> IntVal(13) ),6))
 
+  ,(HashMap[Var,LocVal](Var("temp") -> LocVal(2), Var("temp2")->LocVal(30)),
+    Mem(HashMap[LocVal,Val](LocVal(3) -> RecordVal(Var("x"), LocVal(5), EmptyRecordVal), LocVal(5) -> IntVal(9), LocVal(1) -> IntVal(10), LocVal(4) -> IntVal(21), LocVal(2) -> LocVal(3), LocVal(0) -> IntVal(11),
+      LocVal(30) -> ProcVal(List(Var("x")),Asn(Var("x"),Const(5)),HashMap[Var,LocVal](Var("x") -> LocVal(6))), LocVal(6) -> LocVal(14), LocVal(4) -> IntVal(1), LocVal(15) -> IntVal(7), LocVal(14) -> RecordVal(Var("x"), LocVal(17), EmptyRecordVal),
+      LocVal(17) -> IntVal(8), LocVal(24) -> IntVal(10), LocVal(25) -> IntVal(5), LocVal(20) -> IntVal(1), LocVal(8) -> IntVal(1),
+      LocVal(7) -> IntVal(3)),6), Mem(HashMap(LocVal(3) -> RecordVal(Var("x"),LocVal(5),EmptyRecordVal), LocVal(5) -> IntVal(9), LocVal(6) -> LocVal(14), LocVal(14) -> RecordVal(Var("x"),LocVal(17),EmptyRecordVal), LocVal(17) -> IntVal(8),
+      LocVal(2) -> LocVal(3), LocVal(30) -> ProcVal(List(Var("x")),Asn(Var("x"),Const(5)),HashMap(Var("x") -> LocVal(6)))),6))
+
 
   ,(HashMap[Var,LocVal](Var("temp") -> LocVal(2)),
   Mem(HashMap(LocVal(3) -> RecordVal(Var("x"), LocVal(5), EmptyRecordVal), LocVal(5) -> IntVal(9), LocVal(1) -> IntVal(10), LocVal(4) -> IntVal(21), LocVal(2) -> LocVal(3)),6),
