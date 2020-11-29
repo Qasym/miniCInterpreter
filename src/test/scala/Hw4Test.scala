@@ -47,6 +47,18 @@ Mem(HashMap(LocVal(3) -> IntVal(13), LocVal(5) -> IntVal(9), LocVal(1) -> IntVal
       LocVal(7) -> IntVal(3)),6), Mem(HashMap(LocVal(3) -> RecordVal(Var("x"),LocVal(5),EmptyRecordVal), LocVal(5) -> IntVal(9), LocVal(6) -> LocVal(14), LocVal(14) -> RecordVal(Var("x"),LocVal(17),EmptyRecordVal), LocVal(17) -> IntVal(8),
       LocVal(2) -> LocVal(3), LocVal(30) -> ProcVal(List(Var("x")),Asn(Var("x"),Const(5)),HashMap(Var("x") -> LocVal(6)))),6))
 
+  ,(HashMap(Var("f") -> LocVal(0), Var("y") -> LocVal(1)),Mem(HashMap(LocVal(3) -> IntVal(5), LocVal(1) -> IntVal(10), LocVal(0) -> ProcVal(List(Var("x"), Var("y")),Asn(Var("x"),Const(5)),HashMap()), LocVal(2) -> IntVal(10)),4),
+    Mem(HashMap(LocVal(1) -> IntVal(10), LocVal(0) -> ProcVal(List(Var("x"), Var("y")),Asn(Var("x"),Const(5)),HashMap())),4))
+  ,(HashMap(Var("z") -> LocVal(2), Var("f") -> LocVal(0), Var("y") -> LocVal(1)),Mem(HashMap(LocVal(3) -> IntVal(5), LocVal(1) -> IntVal(10), LocVal(4) -> IntVal(10), LocVal(0) -> ProcVal(List(Var("x"), Var("y")),Add(Sub(Var("x"),Var("y")),Const(10)),HashMap()), LocVal(2) -> IntVal(5)),5),
+    Mem(HashMap(LocVal(1) -> IntVal(10), LocVal(0) -> ProcVal(List(Var("x"), Var("y")),Add(Sub(Var("x"),Var("y")),Const(10)),HashMap()), LocVal(2) -> IntVal(5)),5))
+  ,(HashMap(Var("z") -> LocVal(2), Var("f") -> LocVal(0), Var("fibo") -> LocVal(5), Var("y") -> LocVal(1)),
+    Mem(HashMap(LocVal(3) -> IntVal(5), LocVal(12) -> IntVal(11), LocVal(9) -> IntVal(34), LocVal(1) -> IntVal(10), LocVal(11) -> IntVal(55),
+      LocVal(37) -> IntVal(13), LocVal(42) -> IntVal(34), LocVal(32) -> IntVal(1), LocVal(26) -> IntVal(5), LocVal(33) -> IntVal(8),
+      LocVal(19) -> IntVal(4), LocVal(0) -> ProcVal(List(Var("x"), Var("y")),Add(Sub(Var("x"),Var("y")),Const(10)),HashMap()),
+      LocVal(29) -> IntVal(5), LocVal(43) -> IntVal(10), LocVal(10) -> IntVal(34), LocVal(31) -> IntVal(7), LocVal(30) -> IntVal(8),
+      LocVal(13) -> IntVal(1), LocVal(18) -> IntVal(2), LocVal(16) -> IntVal(1), LocVal(40) -> IntVal(1),
+      LocVal(5) -> ProcVal(List(Var("x")),Ite(LTEExpr(Var("x"),Const(0)),Const(0),Ite(LTEExpr(Var("x"),Const(2)),Const(1),Let(Var("temp"),Const(1),Let(Var("p"),Const(1),Let(Var("ret"),Const(1),Let(Var("y"),Const(3),Block(BeginEnd(WhileExpr(LTEExpr(Var("y"),Var("x")),BeginEnd(Block(Block(Block(Asn(Var("temp"),Var("ret")),Asn(Var("ret"),Add(Var("p"),Var("ret")))),Asn(Var("p"),Var("temp"))),Asn(Var("y"),Add(Var("y"),Const(1))))))),Var("ret")))))))),HashMap(Var("z") -> LocVal(2), Var("f") -> LocVal(0), Var("y") -> LocVal(1))), LocVal(22) -> IntVal(3), LocVal(39) -> IntVal(9), LocVal(23) -> IntVal(5), LocVal(27) -> IntVal(6), LocVal(6) -> IntVal(10), LocVal(4) -> IntVal(10), LocVal(36) -> IntVal(1), LocVal(15) -> IntVal(3), LocVal(14) -> IntVal(1), LocVal(41) -> IntVal(21), LocVal(17) -> IntVal(1), LocVal(24) -> IntVal(1), LocVal(34) -> IntVal(13), LocVal(35) -> IntVal(8), LocVal(38) -> IntVal(21), LocVal(25) -> IntVal(3), LocVal(20) -> IntVal(1), LocVal(21) -> IntVal(2), LocVal(28) -> IntVal(1), LocVal(44) -> IntVal(1), LocVal(8) -> BoolVal(false), LocVal(7) -> BoolVal(false), LocVal(2) -> IntVal(5)),45),
+    Mem(HashMap(LocVal(5) -> ProcVal(List(Var("x")),Ite(LTEExpr(Var("x"),Const(0)),Const(0),Ite(LTEExpr(Var("x"),Const(2)),Const(1),Let(Var("temp"),Const(1),Let(Var("p"),Const(1),Let(Var("ret"),Const(1),Let(Var("y"),Const(3),Block(BeginEnd(WhileExpr(LTEExpr(Var("y"),Var("x")),BeginEnd(Block(Block(Block(Asn(Var("temp"),Var("ret")),Asn(Var("ret"),Add(Var("p"),Var("ret")))),Asn(Var("p"),Var("temp"))),Asn(Var("y"),Add(Var("y"),Const(1))))))),Var("ret")))))))),HashMap(Var("z") -> LocVal(2), Var("f") -> LocVal(0), Var("y") -> LocVal(1))), LocVal(1) -> IntVal(10), LocVal(0) -> ProcVal(List(Var("x"), Var("y")),Add(Sub(Var("x"),Var("y")),Const(10)),HashMap()), LocVal(2) -> IntVal(5)),45))
 
   ,(HashMap[Var,LocVal](Var("temp") -> LocVal(2)),
   Mem(HashMap(LocVal(3) -> RecordVal(Var("x"), LocVal(5), EmptyRecordVal), LocVal(5) -> IntVal(9), LocVal(1) -> IntVal(10), LocVal(4) -> IntVal(21), LocVal(2) -> LocVal(3)),6),
@@ -70,6 +82,7 @@ val miniCTestCases = List(
       ,("not true",BoolVal(false))
       ,("not false",BoolVal(true))
       ,("not 1 == 1",BoolVal(false))
+      // ,("let Dung = {y:=100} in let r = {x:=Dung.y, K:={N:=3}} in r.x + r.K.N + 2",IntVal(105))
       ,("not 1 == 2",BoolVal(true))
       ,("if true then 1 else 2",IntVal(1))
       ,("if false then 1 else 2",IntVal(2))
