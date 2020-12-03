@@ -92,7 +92,7 @@ object MiniCInterpreter {
     if (exprs.size == itr) (vals, mem);
     else {
       val valorem = eval(env, mem, exprs(itr));
-      evalList(exprs, valorem.v :: vals, env, valorem.m, itr + 1);
+      evalList(exprs, vals.toList :+ valorem.v, env, valorem.m, itr + 1);
     }
   }
 
